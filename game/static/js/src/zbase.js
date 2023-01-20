@@ -1,5 +1,5 @@
 class AcGame {
     constructor(id) {
-        this.id = id;
+        console.log("111");
     }
 }
