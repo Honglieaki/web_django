@@ -18,6 +18,7 @@ class Player extends AcGameObject {
         this.damage_vx = 0; // 被攻击后x方向的速度
         this.damage_vy = 0;
         this.damage_speed = 0;
+        this.time_ice = 0; // 无敌时间
 
     }
     start() {
@@ -67,7 +68,7 @@ class Player extends AcGameObject {
         let move_length = this.playground.height;
         let d = Math.atan2(ty - this.y,tx - this.x);
         let vx = Math.cos(d); let vy = Math.sin(d);
-        let r = this.playground.height * 0.02;
+        let r = this.playground.height * 0.01;
         let speed = this.playground.height * 0.5;
         let color = "orange";
         new fireball(this.playground,this,this.x,this.y,r,vx,vy,move_length,color,speed,this.playground.height * 0.01);
@@ -100,10 +101,27 @@ class Player extends AcGameObject {
         this.damage_vy = Math.sin(d);
         this.damage_speed = damage * 100;
         this.speed *= 1.25;
+
+        for(let i = 0 ; i < 10 + Math.random() * 6 ; i ++ ){
+           let x = this.x;let y = this.y;
+           let d = Math.PI * 2 * Math.random();
+           let vx = Math.cos(d); let vy = Math.sin(d);
+           let r = this.r * 0.1;
+           let color = this.color;
+           let speed = this.speed * 10;
+           let move_length = this.r * 20;
+           new Particle(this.playground,x,y,r,vx,vy,color,speed,move_length);
+
+        }
     }
 
     update(){
-
+        this.time_ice += this.timedelta / 1000;
+        if(!this.is_me && this.time_ice > 4 && Math.random() < 1 / 300){
+            let x = this.playground.Players[0].x;
+            let y = this.playground.Players[0].y;
+            this.shoot_ball(x,y);
+        }
         if(this.damage_speed > this.esp){ // 此时正在被攻击无法 移动
             this.vx = 0; this.vy = 0;
             this.move_length = 0;
