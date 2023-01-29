@@ -13,7 +13,7 @@ class AcGameObject {
     }
 
     update() { // 每一帧都会执行一次，除了第一帧之外。
-        console.log("ljh");
+       // console.log("ljh");
     }
 
     remove_objecting(){ // 在物体被删除前执行的操作
@@ -21,7 +21,7 @@ class AcGameObject {
     }
 
     remove_object() { // 删除改物体
-        remove_objecting();
+       this.remove_objecting();
 
         for(let i = 0 ; i < AC_GAME_OBJECTS.length ; i ++ ) {
             if(AC_GAME_OBJECTS[i] == this){

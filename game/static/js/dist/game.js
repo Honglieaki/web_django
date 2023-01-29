@@ -64,7 +64,7 @@ class AcGameObject {
     }
 
     update() { // 每一帧都会执行一次，除了第一帧之外。
-        console.log("ljh");
+       // console.log("ljh");
     }
 
     remove_objecting(){ // 在物体被删除前执行的操作
@@ -72,7 +72,7 @@ class AcGameObject {
     }
 
     remove_object() { // 删除改物体
-        remove_objecting();
+       this.remove_objecting();
 
         for(let i = 0 ; i < AC_GAME_OBJECTS.length ; i ++ ) {
             if(AC_GAME_OBJECTS[i] == this){
@@ -105,6 +105,72 @@ requestAnimationFrame(AC_GAME_ANIMATION); //将一秒钟分成60份
 
 
 
+class fireball extends AcGameObject {
+    constructor(playground,player,x,y,r,vx,vy,move_length,color,speed,damage){
+        super();
+        this.playground = playground;
+        this.player = player;
+        this.x = x; this.y = y; this.r = r;
+       // console.log(x,y,r,vx,vy,move_length,color,speed);
+        this.vx = vx; this.vy = vy;
+        this.ctx = this.playground.gamemap.ctx;
+        this.color = color; this.speed = speed;
+        this.move_length = move_length;
+        this.damage = damage;
+        this.esp = 0.1;
+    }
+
+    start() {
+    }
+
+   update(){
+          if(this.move_length < this.esp){
+              this.remove_object();
+              return false;
+          }
+          else{
+              let move = Math.min(this.move_length,this.speed * this.timedelta / 1000);
+  //            console.log(this.timedalta);
+              this.x += move * this.vx;
+              this.y += move * this.vy;
+              this.move_length -= move;
+          }
+
+         for(let i = 0 ; i < this.playground.Players.length ; i ++ ){ // 判断我发的火球是否攻击到了敌人
+             let player = this.playground.Players[i];
+             if(player != this.player && this.is_collide(player)){
+                this.attack(player);
+             }
+         }
+         this.write();
+      }
+
+    get_dist(x1,y1,x2,y2){
+        let dx = x1 - x2;
+        let dy = y1 - y2;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    is_collide(player){
+        let dis = this.get_dist(player.x,player.y,this.x,this.y);
+        if(dis < this.r + player.r) return true;
+        else return false;
+    }
+
+    attack(player){
+        let d = Math.atan2(player.y - this.y,player.x - this.x);
+        player.is_attacked(d,this.damage);
+        this.remove_object();
+    }
+
+    write(){
+        this.ctx.beginPath();
+        this.ctx.arc(this.x,this.y,this.r,0,Math.PI * 2,false);
+        console.log(this.x,this.y,this.r,this.color);
+        this.ctx.fillStyle = this.color;
+        this.ctx.fill();
+    }
+}
 class GameMap extends AcGameObject {
     constructor(playground){
         super();
@@ -149,11 +215,20 @@ class Player extends AcGameObject {
         this.esp = 0.1;
         this.ctx = this.playground.gamemap.ctx;
         this.move_length = 0;
+        this.select_skill = null; //当前选中的技能
+        this.damage_vx = 0; // 被攻击后x方向的速度
+        this.damage_vy = 0;
+        this.damage_speed = 0;
 
     }
     start() {
         if(this.is_me){
             this.add_listen_events();
+        }else{
+           let tx = Math.random() * this.playground.width;
+           let ty = Math.random() * this.playground.height;
+           this.move_to(tx,ty);
+
         }
     }
 
@@ -169,11 +244,37 @@ class Player extends AcGameObject {
               outer.move_to(e.clientX,e.clientY);
              //   console.log(e.clientX);
             }
+            else if(e.which == 1){
+                if(outer.select_skill == "Q"){
+                    console.log("start");
+                    outer.shoot_ball(e.clientX,e.clientY);
+                }
+                outer.select_skill = null;
+            }
+
+        });
+        $(window).keydown(function(e){
+            if(e.which == 81){
+                outer.select_skill = "Q";
+                console.log("qq");
+                return false;
+            }
 
         });
 
     }
-    
+
+    shoot_ball(tx,ty){
+        let move_length = this.playground.height;
+        let d = Math.atan2(ty - this.y,tx - this.x);
+        let vx = Math.cos(d); let vy = Math.sin(d);
+        let r = this.playground.height * 0.02;
+        let speed = this.playground.height * 0.5;
+        let color = "orange";
+        new fireball(this.playground,this,this.x,this.y,r,vx,vy,move_length,color,speed,this.playground.height * 0.01);
+
+    }
+
     get_dist(x,y,tx,ty){
        let dx = tx - x;
        let dy = ty - y;
@@ -190,10 +291,36 @@ class Player extends AcGameObject {
 
     }
 
+    is_attacked(d,damage){
+        this.r -= damage;
+        if(this.r < 10){
+            this.remove_object();
+            return false;
+        }
+        this.damage_vx = Math.cos(d);
+        this.damage_vy = Math.sin(d);
+        this.damage_speed = damage * 100;
+        this.speed *= 1.25;
+    }
+
     update(){
+
+        if(this.damage_speed > this.esp){ // 此时正在被攻击无法 移动
+            this.vx = 0; this.vy = 0;
+            this.move_length = 0;
+            this.x += this.damage_vx * this.damage_speed * this.timedelta / 1000;
+            this.y += this.damage_vy * this.damage_speed * this.timedelta / 1000;
+            this.damage_speed *= 0.9;
+        }
+        else{
         if(this.move_length < this.esp){
             this.move_length = 0;
             this.vx = this.vy = 0;
+            if(!this.is_me){
+                let tx = Math.random() * this.playground.width;
+                let ty = Math.random() * this.playground.height;
+                this.move_to(tx,ty);
+            }
         }
         else{
             let move = Math.min(this.move_length,this.speed * this.timedelta / 1000);
@@ -202,6 +329,7 @@ class Player extends AcGameObject {
             this.y += move * this.vy;
             this.move_length -= move;
         }
+       }
         this.writer();
     }
 
@@ -227,8 +355,15 @@ class AcGamePlayground {
         this.gamemap = new GameMap(this);
         this.Players = [];
         this.Players.push(new Player(this,this.width / 2,this.height / 2,this.height * 0.05,"white",this.height * 0.15,true));
+        this.rand_color = [];
+        this.rand_color.push("blue");
+        this.rand_color.push("red");
+        this.rand_color.push("orange");
+        for(let i = 0 ; i < 5 ; i ++ ){
+           this.Players.push(new Player(this,this.width / 2,this.height / 2,this.height * 0.05,this.rand_color[Math.floor(Math.random() * 3)],this.height * 0.15,false));
+        }
         this.start();
-    }
+}
 
     start() {
 
