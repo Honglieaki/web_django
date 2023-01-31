@@ -12,6 +12,7 @@ class AcGameMenu {
     </div>
 </div>
 `);
+      this.$menu.hide();
       this.root.$ac_game.append(this.$menu);
       this.$single = this.$menu.find('.ac_game_single');
       this.$doubles = this.$menu.find('.ac_game_double');

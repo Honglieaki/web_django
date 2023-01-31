@@ -19,6 +19,13 @@ class Player extends AcGameObject {
         this.damage_vy = 0;
         this.damage_speed = 0;
         this.time_ice = 0; // 无敌时间
+        this.finshed = new AcGameFinshed(this.playground);
+        if(this.is_me){
+            this.img = new Image(); // 画出人物的头像
+            //this.img.src = this.playground.root.settings.photo;
+            this.img.src = "https://p.qqan.com/up/2020-2/2020022708453463508.jpg";
+            console.log(this.playground.root.settings.username);
+        }
 
     }
     start() {
@@ -42,7 +49,6 @@ class Player extends AcGameObject {
         this.playground.gamemap.$canvas.mousedown(function(e){
             if(e.which == 3){
               outer.move_to(e.clientX,e.clientY);
-             //   console.log(e.clientX);
             }
             else if(e.which == 1){
                 if(outer.select_skill == "Q"){
@@ -84,7 +90,6 @@ class Player extends AcGameObject {
 
     move_to(tx,ty){
         this.move_length = this.get_dist(this.x,this.y,tx,ty);
-        console.log(this.move_length);
         let d = Math.atan2(ty - this.y,tx - this.x);
         this.vx = Math.cos(d);
         this.vy = Math.sin(d);
@@ -94,13 +99,17 @@ class Player extends AcGameObject {
     is_attacked(d,damage){
         this.r -= damage;
         if(this.r < 10){
+            if(this.is_me){
+                //this.playground.hide();
+                //finshed.show();
+          }
             this.remove_object();
             return false;
         }
         this.damage_vx = Math.cos(d);
         this.damage_vy = Math.sin(d);
         this.damage_speed = damage * 100;
-        this.speed *= 1.25;
+        this.speed *= 1.56;
 
         for(let i = 0 ; i < 10 + Math.random() * 6 ; i ++ ){
            let x = this.x;let y = this.y;
@@ -117,7 +126,7 @@ class Player extends AcGameObject {
 
     update(){
         this.time_ice += this.timedelta / 1000;
-        if(!this.is_me && this.time_ice > 4 && Math.random() < 1 / 300){
+        if(!this.is_me && this.time_ice > 4 && Math.random() < 0.030){
             let x = this.playground.Players[0].x;
             let y = this.playground.Players[0].y;
             this.shoot_ball(x,y);
@@ -127,7 +136,7 @@ class Player extends AcGameObject {
             this.move_length = 0;
             this.x += this.damage_vx * this.damage_speed * this.timedelta / 1000;
             this.y += this.damage_vy * this.damage_speed * this.timedelta / 1000;
-            this.damage_speed *= 0.9;
+            this.damage_speed *= 0.5;
         }
         else{
         if(this.move_length < this.esp){
@@ -141,7 +150,6 @@ class Player extends AcGameObject {
         }
         else{
             let move = Math.min(this.move_length,this.speed * this.timedelta / 1000);
-//            console.log(this.timedalta);
             this.x += move * this.vx;
             this.y += move * this.vy;
             this.move_length -= move;
@@ -151,10 +159,21 @@ class Player extends AcGameObject {
     }
 
     writer(){
+        if(this.is_me){
+            this.ctx.save();
+            this.ctx.beginPath();
+            this.ctx.arc(this.x,this.y,this.r,0,Math.PI * 2,false);
+            this.ctx.stroke();
+            this.ctx.clip();
+            this.ctx.drawImage(this.img,this.x - this.r,this.y - this.r,this.r * 2,this.r * 2);
+            this.ctx.restore();
+        }
+        else{
         this.ctx.beginPath();
         this.ctx.arc(this.x,this.y,this.r,0,Math.PI * 2,false);
         this.ctx.fillStyle = this.color;
         this.ctx.fill();
+       }
     }
 
 }

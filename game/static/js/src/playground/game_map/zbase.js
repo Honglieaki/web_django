@@ -7,7 +7,6 @@ class GameMap extends AcGameObject {
         this.ctx.canvas.width = this.playground.width; // 设置画布
         this.ctx.canvas.height = this.playground.height;
         this.playground.$playground.append(this.$canvas);
-        console.log(this.ctx.canvas.width);
 
     }
 

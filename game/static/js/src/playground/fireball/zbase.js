@@ -4,7 +4,6 @@ class fireball extends AcGameObject {
         this.playground = playground;
         this.player = player;
         this.x = x; this.y = y; this.r = r;
-       // console.log(x,y,r,vx,vy,move_length,color,speed);
         this.vx = vx; this.vy = vy;
         this.ctx = this.playground.gamemap.ctx;
         this.color = color; this.speed = speed;
@@ -23,7 +22,6 @@ class fireball extends AcGameObject {
           }
           else{
               let move = Math.min(this.move_length,this.speed * this.timedelta / 1000);
-  //            console.log(this.timedalta);
               this.x += move * this.vx;
               this.y += move * this.vy;
               this.move_length -= move;
@@ -59,7 +57,6 @@ class fireball extends AcGameObject {
     write(){
         this.ctx.beginPath();
         this.ctx.arc(this.x,this.y,this.r,0,Math.PI * 2,false);
-        console.log(this.x,this.y,this.r,this.color);
         this.ctx.fillStyle = this.color;
         this.ctx.fill();
     }
