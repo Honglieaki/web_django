@@ -6,6 +6,5 @@ class AcGame {
         this.settings = new Settings(this);
         this.menu = new AcGameMenu(this);
         this.playground = new AcGamePlayground(this);
-        console.log(this.settings.username);
     }
 }

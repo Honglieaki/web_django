@@ -22,9 +22,8 @@ class Player extends AcGameObject {
         this.finshed = new AcGameFinshed(this.playground);
         if(this.is_me){
             this.img = new Image(); // 画出人物的头像
-            //this.img.src = this.playground.root.settings.photo;
-            this.img.src = "https://p.qqan.com/up/2020-2/2020022708453463508.jpg";
-            console.log(this.playground.root.settings.username);
+            this.img.src = this.playground.root.settings.photo;
+            console.log(this.img.src);
         }
 
     }

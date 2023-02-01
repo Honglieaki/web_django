@@ -8,7 +8,7 @@ class AcGameMenu {
     <br>
     <div class="ac_game_menu_mode_area ac_game_double">多人模式</div>
     <br>
-    <div class="ac_game_menu_mode_area ac_game_settings">设置</div>
+    <div class="ac_game_menu_mode_area ac_game_settings">退出</div>
     </div>
 </div>
 `);
@@ -37,7 +37,7 @@ class AcGameMenu {
         });
 
         this.$settings.click(function(){
-             console.log("settings");
+             outer.root.settings.logout_online();
         });
     }
 

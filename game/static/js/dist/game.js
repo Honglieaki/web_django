@@ -38,7 +38,7 @@ class AcGameMenu {
     <br>
     <div class="ac_game_menu_mode_area ac_game_double">多人模式</div>
     <br>
-    <div class="ac_game_menu_mode_area ac_game_settings">设置</div>
+    <div class="ac_game_menu_mode_area ac_game_settings">退出</div>
     </div>
 </div>
 `);
@@ -67,7 +67,7 @@ class AcGameMenu {
         });
 
         this.$settings.click(function(){
-             console.log("settings");
+             outer.root.settings.logout_online();
         });
     }
 
@@ -291,9 +291,8 @@ class Player extends AcGameObject {
         this.finshed = new AcGameFinshed(this.playground);
         if(this.is_me){
             this.img = new Image(); // 画出人物的头像
-            //this.img.src = this.playground.root.settings.photo;
-            this.img.src = "https://p.qqan.com/up/2020-2/2020022708453463508.jpg";
-            console.log(this.playground.root.settings.username);
+            this.img.src = this.playground.root.settings.photo;
+            console.log(this.img.src);
         }
 
     }
@@ -595,6 +594,7 @@ class Settings {
 
     start(){
         this.getinfo();
+        this.getinfo_2();
         this.add_listen_events();
     }
 
@@ -608,7 +608,83 @@ class Settings {
         this.$register_login.click(function(){
             outer.login();
         });
+
+        this.$login_submit.click(function(){
+            outer.login_online();
+        });
+
+        this.$register_submit.click(function(){
+            outer.register_online();
+        });
     }
+
+    login_online(){ // 远程登录
+        let outer = this;
+        let username = this.$login_username.val();
+        let password = this.$login_password.val();
+        this.$login_error_message.empty();
+        $.ajax({
+            url:"http://43.143.240.6:8000/settings/Login/",
+            type:"GET",
+            data:{
+                username: username,
+                password: password,
+            },
+            success: function(resp){
+                console.log(resp);
+                if(resp.result === "success"){
+                    location.reload();
+                }
+                else{
+                    outer.$login_error_message.html(resp.result);
+                }
+            }
+
+        });
+    }
+
+
+    register_online(){ //远程注册
+        let outer = this;
+        let username = this.$register_username.val();
+        let password = this.$register_password.val();
+        let password_confirm = this.$register_password_confirm.val();
+
+        $.ajax({
+            url : "http://43.143.240.6:8000/settings/register/",
+            type : "GET",
+            data : {
+                username : username,
+                password : password,
+                password_confirm : password_confirm,
+            },
+            success : function(resp){
+                if(resp.result === "success"){
+                    location.reload();
+                }
+                else{
+                    outer.$register_error_message.html(resp.result);
+                }
+            }
+        });
+    }
+
+    logout_online(){ //远程登出
+        let outer = this;
+        if(this.platform == "ACAPP") return false;
+
+        $.ajax({
+            url : "http://43.143.240.6:8000/settings/Logout/",
+            type : "GET",
+            success : function(resp){
+                if(resp.result === "success"){
+                    console.log("logout success");
+                    location.reload();
+                }
+            }
+        });
+    }
+
 
     add_listen_events_register(){
         let outer = this;
@@ -628,31 +704,48 @@ class Settings {
     }
 
     getinfo(){
+        var name = "";
+        var photo = "";
         let outer = this;
         $.ajax({
             url: "http://43.143.240.6:8000/settings/getinfo/",
             type: "GET",
+            async:false,
             data: {
                 platform: outer.platform,
             },
             success: function(resp) {
                 if(resp.result === "success") { //登录成功
-                    console.log(resp.username,resp.photo);
-                    outer.photo=resp.photo;
-                    outer.username=resp.username;
-                    console.log(outer.username,outer.photo);
-                    outer.hide();
-                    outer.root.menu.show();
-                }
-                else{
-                    console.log(resp);
-                    outer.login(); //否则需要登录
+                    name = resp.username;
+                    photo = resp.photo;
                 }
             }
-
         });
+        outer.username = name;
+        outer.photo = photo;
 
     }
+
+    getinfo_2(){
+        let outer = this;
+         $.ajax({
+             url: "http://43.143.240.6:8000/settings/getinfo/",
+             type: "GET",
+             data: {
+                 platform: outer.platform,
+             },
+            success: function(resp) {
+                 if(resp.result === "success") { //登录成功
+                     outer.hide();
+                     outer.root.menu.show();
+                 }
+                 else{
+                   outer.login(); //否则需要登录
+                }
+            }
+        });
+
+     }
 
     show() {
         this.$settings.show();
@@ -670,6 +763,5 @@ class AcGame {
         this.settings = new Settings(this);
         this.menu = new AcGameMenu(this);
         this.playground = new AcGamePlayground(this);
-        console.log(this.settings.username);
     }
 }

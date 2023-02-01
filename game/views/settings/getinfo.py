@@ -10,13 +10,14 @@ def getinfo_acapp(request):
         })
 
 def getinfo_web(request):
-    player = Player.objects.all()[0];
-    user = request.user;
+#    player = Player.objects.all()[0];
+    user = request.user
     if not user.is_authenticated:
         return JsonResponse({
                 'result': "not login"
             })
     else :
+        player = Player.objects.get(user=user)
         return JsonResponse({
             'result' : "success",
             'username' : player.user.username,
