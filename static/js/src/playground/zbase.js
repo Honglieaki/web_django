@@ -12,6 +12,22 @@ class AcGamePlayground {
 }
 
     start() {
+        let outer = this;
+        console.log("ac_playground start");
+        $(window).resize(function(){
+            outer.resize();
+            console.log("staert");
+        });
+    }
+    resize(){
+        this.width = this.$playground.width();
+        this.height = this.$playground.height();
+        this.unit = Math.min(this.width / 16 , this.height / 9);
+        this.width = this.unit * 16;
+        this.height = this.unit * 9;
+
+        this.scale = this.height;
+        if(this.gamemap) this.gamemap.resize();
 
     }
 

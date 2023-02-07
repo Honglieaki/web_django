@@ -46,13 +46,13 @@ class Player extends AcGameObject {
         });
 
         this.playground.gamemap.$canvas.mousedown(function(e){
+            const rect = outer.ctx.canvas.getBoundingClientRect();
             if(e.which == 3){
-              outer.move_to(e.clientX,e.clientY);
+              outer.move_to((e.clientX - rect.left),(e.clientY - rect.top));
             }
             else if(e.which == 1){
                 if(outer.select_skill == "Q"){
-                    console.log("start");
-                    outer.shoot_ball(e.clientX,e.clientY);
+                    outer.shoot_ball(e.clientX - rect.left,e.clientY - rect.top);
                 }
                 outer.select_skill = null;
             }
@@ -61,7 +61,6 @@ class Player extends AcGameObject {
         $(window).keydown(function(e){
             if(e.which == 81){
                 outer.select_skill = "Q";
-                console.log("qq");
                 return false;
             }
 

@@ -220,6 +220,13 @@ class GameMap extends AcGameObject {
         this.writer();
     }
 
+    resize(){
+        this.ctx.canvas.width = this.playground.width;
+        this.ctx.canvas.height = this.playground.height;
+        this.ctx.fillStyle = "rgba(0,0,0,1)";
+        this.ctx.fillRect(0,0,this.ctx.canvas.width,this.ctx.canvas.height);
+    }
+
     writer(){
         this.ctx.fillStyle = "rgba(0,0,0,0.09)";
         this.ctx.fillRect(0,0,this.ctx.canvas.width,this.ctx.canvas.height);
@@ -315,13 +322,13 @@ class Player extends AcGameObject {
         });
 
         this.playground.gamemap.$canvas.mousedown(function(e){
+            const rect = outer.ctx.canvas.getBoundingClientRect();
             if(e.which == 3){
-              outer.move_to(e.clientX,e.clientY);
+              outer.move_to((e.clientX - rect.left),(e.clientY - rect.top));
             }
             else if(e.which == 1){
                 if(outer.select_skill == "Q"){
-                    console.log("start");
-                    outer.shoot_ball(e.clientX,e.clientY);
+                    outer.shoot_ball(e.clientX - rect.left,e.clientY - rect.top);
                 }
                 outer.select_skill = null;
             }
@@ -330,7 +337,6 @@ class Player extends AcGameObject {
         $(window).keydown(function(e){
             if(e.which == 81){
                 outer.select_skill = "Q";
-                console.log("qq");
                 return false;
             }
 
@@ -459,6 +465,22 @@ class AcGamePlayground {
 }
 
     start() {
+        let outer = this;
+        console.log("ac_playground start");
+        $(window).resize(function(){
+            outer.resize();
+            console.log("staert");
+        });
+    }
+    resize(){
+        this.width = this.$playground.width();
+        this.height = this.$playground.height();
+        this.unit = Math.min(this.width / 16 , this.height / 9);
+        this.width = this.unit * 16;
+        this.height = this.unit * 9;
+
+        this.scale = this.height;
+        if(this.gamemap) this.gamemap.resize();
 
     }
 
