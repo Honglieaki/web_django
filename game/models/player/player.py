@@ -8,7 +8,7 @@ class Player(models.Model) : # Player类继承Model
 
     photo = models.URLField(max_length=256,blank=True)
     # 创建player表中的属性：头像
-
+    openid = models.CharField(default="", max_length=256, blank=True, null=True)
     def __str__(self) :
         return str(self.user)
 

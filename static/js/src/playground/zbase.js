@@ -7,6 +7,15 @@ class AcGamePlayground {
 `);
         this.hide();
         this.root.$ac_game.append(this.$playground);
+    
+        this.start();
+}
+
+    start() {
+
+    }
+
+    show(){  //展示游戏界面
         this.width = this.$playground.width();
         this.height = this.$playground.height();
         this.gamemap = new GameMap(this);
@@ -17,16 +26,8 @@ class AcGamePlayground {
         this.rand_color.push("red");
         this.rand_color.push("orange");
         for(let i = 0 ; i < 5 ; i ++ ){
-           this.Players.push(new Player(this,this.width / 2,this.height / 2,this.height * 0.05,this.rand_color[Math.floor(Math.random() * 3)],this.height * 0.15,false));
+              this.Players.push(new Player(this,this.width / 2,this.height / 2,this.height * 0.05,this.rand_color[Math.floor(Math.random() * 3)],this.height     * 0.15,false));
         }
-        this.start();
-}
-
-    start() {
-
-    }
-
-    show(){  //展示游戏界面
         this.$playground.show();
     }
 

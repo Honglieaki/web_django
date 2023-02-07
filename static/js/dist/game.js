@@ -454,6 +454,15 @@ class AcGamePlayground {
 `);
         this.hide();
         this.root.$ac_game.append(this.$playground);
+    
+        this.start();
+}
+
+    start() {
+
+    }
+
+    show(){  //展示游戏界面
         this.width = this.$playground.width();
         this.height = this.$playground.height();
         this.gamemap = new GameMap(this);
@@ -464,16 +473,8 @@ class AcGamePlayground {
         this.rand_color.push("red");
         this.rand_color.push("orange");
         for(let i = 0 ; i < 5 ; i ++ ){
-           this.Players.push(new Player(this,this.width / 2,this.height / 2,this.height * 0.05,this.rand_color[Math.floor(Math.random() * 3)],this.height * 0.15,false));
+              this.Players.push(new Player(this,this.width / 2,this.height / 2,this.height * 0.05,this.rand_color[Math.floor(Math.random() * 3)],this.height     * 0.15,false));
         }
-        this.start();
-}
-
-    start() {
-
-    }
-
-    show(){  //展示游戏界面
         this.$playground.show();
     }
 
@@ -585,7 +586,7 @@ class Settings {
         this.$register_submit = this.$register.find(".ac-game-settings-submit button");
         this.$register_error_message = this.$register.find(".ac-game-settings-error-message");
         this.$register_login = this.$register.find(".ac-game-settings-option");
-
+        this.$acwing_login = this.$settings.find(".ac-game-settings-acwing img");
         this.$register.hide();
 
         this.start();
@@ -599,8 +600,29 @@ class Settings {
     }
 
     add_listen_events(){
+        let outer = this;
         this.add_listen_events_login();
         this.add_listen_events_register();
+
+        this.$acwing_login.click(function(){
+            outer.acwing_login();
+        });
+    }
+    acwing_login(){
+        let outer = this;
+        
+        $.ajax({
+            url : "https://app2365.acapp.acwing.com.cn/settings/acwing/web/apply_code",
+            type : "GET",
+            success : function(resp){
+                if(resp.result === "success"){
+                    window.location.replace(resp.apply_code_url);
+
+                }
+            }
+
+        });
+
     }
 
     add_listen_events_login(){
