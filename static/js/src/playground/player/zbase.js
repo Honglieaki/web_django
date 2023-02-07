@@ -11,7 +11,7 @@ class Player extends AcGameObject {
         this.color = color;
         this.speed = speed;
         this.is_me = is_me;
-        this.esp = 0.1;
+        this.eps = 0.01;
         this.ctx = this.playground.gamemap.ctx;
         this.move_length = 0;
         this.select_skill = null; //当前选中的技能
@@ -31,8 +31,8 @@ class Player extends AcGameObject {
         if(this.is_me){
             this.add_listen_events();
         }else{
-           let tx = Math.random() * this.playground.width;
-           let ty = Math.random() * this.playground.height;
+           let tx = Math.random() * this.playground.width / this.playground.scale;
+           let ty = Math.random() * 1.0;
            this.move_to(tx,ty);
 
         }
@@ -44,15 +44,15 @@ class Player extends AcGameObject {
         this.playground.gamemap.$canvas.on("contextmenu",function(){//让页面的弹出菜单失效
             return false;
         });
-
+        let scale = this.playground.scale;
         this.playground.gamemap.$canvas.mousedown(function(e){
             const rect = outer.ctx.canvas.getBoundingClientRect();
             if(e.which == 3){
-              outer.move_to((e.clientX - rect.left),(e.clientY - rect.top));
+              outer.move_to((e.clientX - rect.left) / scale,(e.clientY - rect.top) / scale);
             }
             else if(e.which == 1){
                 if(outer.select_skill == "Q"){
-                    outer.shoot_ball(e.clientX - rect.left,e.clientY - rect.top);
+                    outer.shoot_ball((e.clientX - rect.left) / scale,(e.clientY - rect.top) / scale);
                 }
                 outer.select_skill = null;
             }
@@ -69,13 +69,13 @@ class Player extends AcGameObject {
     }
 
     shoot_ball(tx,ty){
-        let move_length = this.playground.height;
+        let move_length = 1.0;
         let d = Math.atan2(ty - this.y,tx - this.x);
         let vx = Math.cos(d); let vy = Math.sin(d);
-        let r = this.playground.height * 0.01;
-        let speed = this.playground.height * 0.5;
+        let r = 0.01;
+        let speed = 0.5;
         let color = "orange";
-        new fireball(this.playground,this,this.x,this.y,r,vx,vy,move_length,color,speed,this.playground.height * 0.01);
+        new fireball(this.playground,this,this.x,this.y,r,vx,vy,move_length,color,speed,0.01);
 
     }
 
@@ -96,10 +96,10 @@ class Player extends AcGameObject {
 
     is_attacked(d,damage){
         this.r -= damage;
-        if(this.r < 10){
+        if(this.r < this.eps){
             if(this.is_me){
                 //this.playground.hide();
-                //finshed.show();
+                //finshed.show()
           }
             this.remove_object();
             return false;
@@ -108,9 +108,11 @@ class Player extends AcGameObject {
         this.damage_vy = Math.sin(d);
         this.damage_speed = damage * 100;
         this.speed *= 1.56;
-
+        let scale = this.playground.scale;
+        // 粒子效果
         for(let i = 0 ; i < 10 + Math.random() * 6 ; i ++ ){
-           let x = this.x;let y = this.y;
+           let x = this.x;
+           let y = this.y;
            let d = Math.PI * 2 * Math.random();
            let vx = Math.cos(d); let vy = Math.sin(d);
            let r = this.r * 0.1;
@@ -121,28 +123,32 @@ class Player extends AcGameObject {
 
         }
     }
-
     update(){
+        this.update_move();
+        this.writer();
+    }
+
+    update_move(){
         this.time_ice += this.timedelta / 1000;
         if(!this.is_me && this.time_ice > 4 && Math.random() < 0.030){
             let x = this.playground.Players[0].x;
             let y = this.playground.Players[0].y;
             this.shoot_ball(x,y);
         }
-        if(this.damage_speed > this.esp){ // 此时正在被攻击无法 移动
+        if(this.damage_speed > this.eps){ // 此时正在被攻击无法 移动
             this.vx = 0; this.vy = 0;
             this.move_length = 0;
             this.x += this.damage_vx * this.damage_speed * this.timedelta / 1000;
             this.y += this.damage_vy * this.damage_speed * this.timedelta / 1000;
-            this.damage_speed *= 0.5;
+            this.damage_speed *= 0.8;
         }
         else{
-        if(this.move_length < this.esp){
+        if(this.move_length < this.eps){
             this.move_length = 0;
             this.vx = this.vy = 0;
             if(!this.is_me){
-                let tx = Math.random() * this.playground.width;
-                let ty = Math.random() * this.playground.height;
+                let tx = Math.random() * this.playground.width / this.playground.scale;
+                let ty = Math.random() * this.playground.height / this.playground.scale;
                 this.move_to(tx,ty);
             }
         }
@@ -153,22 +159,26 @@ class Player extends AcGameObject {
             this.move_length -= move;
         }
        }
-        this.writer();
     }
 
     writer(){
+        let scale = this.playground.scale;
+        if(this.r < this.eps){
+            this.remove_object();
+            return false;
+        }
         if(this.is_me){
             this.ctx.save();
             this.ctx.beginPath();
-            this.ctx.arc(this.x,this.y,this.r,0,Math.PI * 2,false);
+            this.ctx.arc(this.x * scale,this.y * scale,this.r * scale,0,Math.PI * 2,false);
             this.ctx.stroke();
             this.ctx.clip();
-            this.ctx.drawImage(this.img,this.x - this.r,this.y - this.r,this.r * 2,this.r * 2);
+            this.ctx.drawImage(this.img,(this.x - this.r) * scale,(this.y - this.r) * scale,(this.r * 2) * scale,(this.r * 2) * scale);
             this.ctx.restore();
         }
         else{
         this.ctx.beginPath();
-        this.ctx.arc(this.x,this.y,this.r,0,Math.PI * 2,false);
+        this.ctx.arc(this.x * scale,this.y * scale,this.r * scale,0,Math.PI * 2,false);
         this.ctx.fillStyle = this.color;
         this.ctx.fill();
        }

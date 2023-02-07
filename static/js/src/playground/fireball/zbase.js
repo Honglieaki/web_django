@@ -9,7 +9,7 @@ class fireball extends AcGameObject {
         this.color = color; this.speed = speed;
         this.move_length = move_length;
         this.damage = damage;
-        this.esp = 0.1;
+        this.esp = 0.01;
     }
 
     start() {
@@ -55,8 +55,10 @@ class fireball extends AcGameObject {
     }
 
     write(){
+        let scale = this.playground.scale
         this.ctx.beginPath();
-        this.ctx.arc(this.x,this.y,this.r,0,Math.PI * 2,false);
+        this.ctx.arc(this.x * scale,this.y * scale,this.r * scale,0,Math.PI * 2,false);
+        console.log(this.r * scale);
         this.ctx.fillStyle = this.color;
         this.ctx.fill();
     }

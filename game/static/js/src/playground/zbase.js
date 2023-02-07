@@ -13,10 +13,8 @@ class AcGamePlayground {
 
     start() {
         let outer = this;
-        console.log("ac_playground start");
         $(window).resize(function(){
             outer.resize();
-            console.log("staert");
         });
     }
     resize(){
@@ -34,15 +32,16 @@ class AcGamePlayground {
     show(){  //展示游戏界面
         this.width = this.$playground.width();
         this.height = this.$playground.height();
+        this.scale = this.height;
         this.gamemap = new GameMap(this);
         this.Players = [];
-        this.Players.push(new Player(this,this.width / 2,this.height / 2,this.height * 0.05,"white",this.height * 0.15,true));
+        this.Players.push(new Player(this,this.width / 2 / this.scale,0.5,0.05,"white",0.15,true));
         this.rand_color = [];
         this.rand_color.push("blue");
         this.rand_color.push("red");
-        this.rand_color.push("orange");
+        this.rand_color.push("pink");
         for(let i = 0 ; i < 5 ; i ++ ){
-              this.Players.push(new Player(this,this.width / 2,this.height / 2,this.height * 0.05,this.rand_color[Math.floor(Math.random() * 3)],this.height     * 0.15,false));
+              this.Players.push(new Player(this,this.width / 2 / this.scale,0.5,0.05,this.rand_color[Math.floor(Math.random() * 3)],0.15,false));
         }
         this.$playground.show();
     }
